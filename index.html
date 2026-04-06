@@ -25,132 +25,112 @@
   </style>
 </head>
 <body>
-  <h1>Thêm sản phẩm</h1>
-  <div>
+    <h2>Thêm Sản Phẩm</h2>
     <div>
-      <label for="input-name">Tên sản phẩm:</label>
-      <input type="text" id="input-name" name="input-name">
+        <div class="form-group">
+            <label>Tên:</label>
+            <input type="text" id="input-name">
+        </div>
+        <div class="form-group">
+            <label>Danh mục:</label>
+            <input type="text" id="input-category">
+        </div>
+        <div class="form-group">
+            <label>Đơn giá:</label>
+            <input type="number" id="input-price">
+        </div>
+        <div class="form-group">
+            <label>Số lượng:</label>
+            <input type="number" id="input-quantity">
+        </div>
+        <button id="btn-add">Thêm mới</button>
     </div>
-    <div>
-      <label for="input-category">Danh mục:</label>
-      <input type="text" id="input-category" name="input-category">
-    </div>
-    <div>
-      <label for="input-price">Đơn giá:</label>
-      <input type="number" id="input-price" name="input-price">
-    </div>
-    <div>
-      <label for="input-quantity">Số lượng:</label>
-      <input type="number" id="input-quantity" name="input-quantity">
-    </div>
-    <button id="btn-add">Thêm sản phẩm</button>
-    <div id="error-message"></div>
-  </div>
 
-  <h1>Danh sách sản phẩm</h1>
-  <table id="product-table">
-    <thead>
-      <tr>
-        <th>STT</th>
-        <th id="th-name">Tên sản phẩm<span id="sort-icon"></span></th>
-        <th>Danh mục</th>
-        <th>Đơn giá</th>
-        <th>Số lượng</th>
-      </tr>
-    </thead>
-    <tbody id="product-tbody">
-    </tbody>
-  </table>
+    <h2>Danh Sách Sản Phẩm</h2>
+    <table id="product-table">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th id="sort-name">Tên sản phẩm </th>
+                <th>Danh mục</th>
+                <th>Đơn giá</th>
+                <th>Số lượng</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
   <script>
-    let products = [];
-    let isAscending = true;
-
-    loadProducts();
-    document.getElementById('btn-add').addEventListener('click', addProduct);
-    document.getElementById('th-name').addEventListener('click', sortProductsByName);
-
-    function loadProducts() {
-      const xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          products = JSON.parse(xhr.responseText);
-          renderTable();
-        }
-      };
-      xhr.open('GET', 'products.json');
-      xhr.send();
-    }
+    var products = [];
+    var isAsc = false;
 
     function renderTable() {
-      const tbody = document.getElementById('product-tbody');
-      tbody.innerHTML = '';
-      products.forEach((product, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${product.name}</td>
-          <td>${product.category}</td>
-          <td>${product.price}</td>
-          <td>${product.quantity}</td>
-        `;
-        tbody.appendChild(row);
-      });
+        var tbody = document.querySelector('#product-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        
+        for (var i = 0; i < products.length; i++) {
+            var p = products[i];
+            var tr = document.createElement('tr');
+   
+            tr.innerHTML = 
+                '<td>' + (i + 1) + '</td>' +
+                '<td>' + p.name + '</td>' +
+                '<td>' + p.category + '</td>' +
+                '<td>' + p.price + '</td>' +
+                '<td>' + p.quantity + '</td>';
+            
+            tbody.appendChild(tr);
+        }
     }
 
-    function sortProductsByName() {
-      const sortIcon = document.getElementById("sort-icon");
-            if (isAscending) {
-                products.sort((a, b) => a.name.localeCompare(b.name));
-                sortIcon.innerHTML = "▲";
-            } else {
-                products.sort((a, b) => b.name.localeCompare(a.name));
-                sortIcon.innerHTML = "▼";
+    function loadData() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                products = JSON.parse(xhr.responseText);
+                renderTable();
             }
-            
-            isAscending = !isAscending;
-            
-            renderTable();
+        };
+        xhr.open('GET', 'products.json');
+        xhr.send();
     }
 
-    function addProduct() {
-      const name = document.getElementById('input-name');
-      const category = document.getElementById('input-category');
-      const price = document.getElementById('input-price');
-      const quantity = document.getElementById('input-quantity');
-      const errorMessage = document.getElementById('error-message');
+    document.getElementById('sort-name').addEventListener('click', function() {
+        isAsc = !isAsc;
+        products.sort(function(a, b) {
+            if (a.name < b.name) return isAsc ? -1 : 1;
+            if (a.name > b.name) return isAsc ? 1 : -1;
+            return 0;
+        });
+        renderTable();
+    });
 
-      const nameValue = name.value.trim();
-      const priceValue = parseFloat(price.value);
-      const quantityValue = parseInt(quantity.value);
-      const categoryValue = category.value.trim();
+    document.getElementById('btn-add').addEventListener('click', function() {
+        var name = document.getElementById('input-name').value;
+        var category = document.getElementById('input-category').value;
+        var price = document.getElementById('input-price').value;
+        var quantity = document.getElementById('input-quantity').value;
 
-      errorMessage.innerHTML = '';
+        if (!name) return;
 
-      if (nameValue.length < 3) {
-        errorMessage.innerHTML = 'Tên sản phẩm phải có ít nhất 3 ký tự.';
-        return;
-      }
+        products.push({
+            id: Date.now(),
+            name: name,
+            category: category,
+            price: Number(price),
+            quantity: Number(quantity)
+        });
 
-      if (isNaN(priceValue) || priceValue <= 0) {
-        errorMessage.innerHTML = 'Đơn giá phải là một số dương.';
-        return;
-      }
+        renderTable();
 
-      if (isNaN(quantityValue) || quantityValue <= 0) {
-        errorMessage.innerHTML = 'Số lượng phải là một số dương.';
-        return;
-      }
+        document.getElementById('input-name').value = '';
+        document.getElementById('input-category').value = '';
+        document.getElementById('input-price').value = '';
+        document.getElementById('input-quantity').value = '';
+    });
 
-      const newProduct = { name: nameValue, category: categoryValue, price: priceValue, quantity: quantityValue };
-      products.push(newProduct);
-      renderTable();
-
-      name.value = '';
-      category.value = '';
-      price.value = '';
-      quantity.value = '';
-    }
+    loadData();
   </script>
 </body>
 </html>
