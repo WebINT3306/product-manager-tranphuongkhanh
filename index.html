@@ -44,6 +44,7 @@
       <input type="number" id="input-quantity" name="input-quantity">
     </div>
     <button id="btn-add">Thêm sản phẩm</button>
+    <div id="error-message"></div>
   </div>
 
   <h1>Danh sách sản phẩm</h1>
@@ -119,24 +120,27 @@
       const category = document.getElementById('input-category');
       const price = document.getElementById('input-price');
       const quantity = document.getElementById('input-quantity');
+      const errorMessage = document.getElementById('error-message');
 
       const nameValue = name.value.trim();
       const priceValue = parseFloat(price.value);
       const quantityValue = parseInt(quantity.value);
       const categoryValue = category.value.trim();
 
+      errorMessage.innerHTML = '';
+
       if (nameValue.length < 3) {
-        alert('Tên sản phẩm phải có ít nhất 3 ký tự.');
+        errorMessage.innerHTML = 'Tên sản phẩm phải có ít nhất 3 ký tự.';
         return;
       }
 
       if (isNaN(priceValue) || priceValue <= 0) {
-        alert('Đơn giá phải là một số dương.');
+        errorMessage.innerHTML = 'Đơn giá phải là một số dương.';
         return;
       }
 
       if (isNaN(quantityValue) || quantityValue <= 0) {
-        alert('Số lượng phải là một số dương.');
+        errorMessage.innerHTML = 'Số lượng phải là một số dương.';
         return;
       }
 
