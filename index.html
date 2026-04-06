@@ -66,11 +66,9 @@
     let products = [];
     let isAscending = true;
 
-    document.addEventListener('DOMContentLoaded', function() {
-      loadProducts();
-      document.getElementById('btn-add').addEventListener('click', addProduct);
-      document.getElementById('th-name').addEventListener('click', sortProductsByName);
-    });
+    loadProducts();
+    document.getElementById('btn-add').addEventListener('click', addProduct);
+    document.getElementById('th-name').addEventListener('click', sortProductsByName);
 
     function loadProducts() {
       const xhr = new XMLHttpRequest();
