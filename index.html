@@ -4,8 +4,151 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý Sản phẩm</title>
+  <style>
+    table {
+      width: 80%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
+  <h1>Thêm sản phẩm</h1>
+  <div>
+    <div>
+      <label for="input-name">Tên sản phẩm:</label>
+      <input type="text" id="input-name" name="input-name">
+    </div>
+    <div>
+      <label for="input-category">Danh mục:</label>
+      <input type="text" id="input-category" name="input-category">
+    </div>
+    <div>
+      <label for="input-price">Đơn giá:</label>
+      <input type="number" id="input-price" name="input-price">
+    </div>
+    <div>
+      <label for="input-quantity">Số lượng:</label>
+      <input type="number" id="input-quantity" name="input-quantity">
+    </div>
+    <button id="btn-add">Thêm sản phẩm</button>
+  </div>
 
+  <h1>Danh sách sản phẩm</h1>
+  <table id="product-table">
+    <thead>
+      <tr>
+        <th>STT</th>
+        <th id="th-name">Tên sản phẩm<span id="sort-icon"></span></th>
+        <th>Danh mục</th>
+        <th>Đơn giá</th>
+        <th>Số lượng</th>
+      </tr>
+    </thead>
+    <tbody id="product-tbody">
+    </tbody>
+  </table>
+
+  <script>
+    let products = [];
+    let isAscending = true;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadProducts();
+      document.getElementById('btn-add').addEventListener('click', addProduct);
+      document.getElementById('th-name').addEventListener('click', sortProductsByName);
+    });
+
+    function loadProducts() {
+      const xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          const products = JSON.parse(xhr.responseText);
+          renderTable();
+        }
+      };
+      xhr.open('GET', 'products.json');
+      xhr.send();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('product-tbody');
+      tbody.innerHTML = '';
+      products.forEach((product, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${product.name}</td>
+          <td>${product.category}</td>
+          <td>${product.price}</td>
+          <td>${product.quantity}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function sortProductsByName() {
+      const sortIcon = document.getElementById("sort-icon");
+            if (isAscending) {
+                products.sort((a, b) => a.name.localeCompare(b.name));
+                sortIcon.innerHTML = "▲";
+            } else {
+                products.sort((a, b) => b.name.localeCompare(a.name));
+                sortIcon.innerHTML = "▼";
+            }
+            
+            isAscending = !isAscending;
+            
+            renderTable();
+    }
+
+    function addProduct() {
+      const name = document.getElementById('input-name');
+      const category = document.getElementById('input-category');
+      const price = document.getElementById('input-price');
+      const quantity = document.getElementById('input-quantity');
+
+      const nameValue = name.value.trim();
+      const priceValue = parseFloat(price.value);
+      const quantityValue = parseInt(quantity.value);
+      const categoryValue = category.value.trim();
+
+      if (nameValue.length < 3) {
+        alert('Tên sản phẩm phải có ít nhất 3 ký tự.');
+        return;
+      }
+
+      if (isNaN(priceValue) || priceValue <= 0) {
+        alert('Đơn giá phải là một số dương.');
+        return;
+      }
+
+      if (isNaN(quantityValue) || quantityValue <= 0) {
+        alert('Số lượng phải là một số dương.');
+        return;
+      }
+
+      const newProduct = { name: nameValue, category: categoryValue, price: priceValue, quantity: quantityValue };
+      products.push(newProduct);
+      renderTable();
+
+      name.value = '';
+      category.value = '';
+      price.value = '';
+      quantity.value = '';
+    }
+  </script>
 </body>
 </html>
